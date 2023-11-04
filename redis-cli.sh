@@ -320,3 +320,32 @@ localhost:6379> xreadgroup group member member-consumer-2 count 1 block 0 stream
          2) 1) "userId"
             2) "4"
 localhost:6379>
+
+
+
+# Geospatial
+# Struktur data geospatial digunakan untuk menyimpan data koordinat
+# Struktur data ini sangat bagus untuk mencari koordinat terdekat, jarak, radius dan lain-lain
+
+# menambahkan data geospatial
+localhost:6379> geoadd seller.location 107.158860 -6.807992 seller1
+(integer) 1
+localhost:6379> geoadd seller.location 107.164003 -6.806307 seller2
+(integer) 1
+localhost:6379> geopos seller.location seller1
+1) 1) "107.15886086225509644"
+   2) "-6.80799108618095516"
+localhost:6379> geopos seller.location seller2
+1) 1) "107.1640053391456604"
+   2) "-6.80630803133114881"
+localhost:6379>
+
+# mencari data geospatial
+localhost:6379> geodist seller.location seller1 seller2 km
+"0.5982"
+localhost:6379> geodist seller.location seller1 seller2 m
+"598.2125"
+localhost:6379> geosearch seller.location fromlonlat 107.160707 -6.804819 BYRADIUS 1 km
+1) "seller2"
+2) "seller1"
+localhost:6379>
