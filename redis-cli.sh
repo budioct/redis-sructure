@@ -67,3 +67,62 @@ localhost:6379>
 
 
 
+# Sets
+# Sets adalah struktur data mirip seperti Lists, namun yang membedakan adalah, pada Sets, isi data harus unik
+# data yang sebelumnya sudah ada, maka otomatis data tersebut tidak akan diterima
+# Data di Sets itu tidak berurutan sesuai waktu kita memasukkan data ke Sets
+
+# menambah data ke sets
+localhost:6379> sadd race "budhi" "oct" "malik"
+(integer) 3
+localhost:6379> sadd race "budhi" "oct" "malik"
+(integer) 0
+localhost:6379> scard race
+(integer) 3
+localhost:6379> smembers race
+1) "budhi"
+2) "oct"
+3) "malik"
+localhost:6379>
+
+# menghapus data dari set
+localhost:6379> srem race "budhi" "oct" "malik"
+(integer) 3
+localhost:6379> smembers race
+(empty array)
+localhost:6379>
+
+# Syntax
+# SDIFF digunakan untuk melihat perbedaan (different) dari Sets pertama dengan Sets lainnya
+# SINTER digunakan untuk melihat kesamaan (intersect) dari beberapa Sets
+# SUNION digunakan untuk melihat gabungan unik (union) dari beberapa Sets
+
+# SDIFF
+localhost:6379> sadd race2 "budhi" "oct" "malik"
+(integer) 3
+localhost:6379> sadd race3 "budhi" "adam" "husei"
+(integer) 3
+localhost:6379> sdiff race2 race3
+1) "oct"
+2) "malik"
+localhost:6379>
+
+# SINTER
+localhost:6379> sadd race2 "budhi" "oct" "malik"
+(integer) 3
+localhost:6379> sadd race3 "budhi" "adam" "husei"
+(integer) 3
+localhost:6379> sinter race2 race3
+1) "budhi"
+localhost:6379>
+
+# SUNION
+localhost:6379> sunion race2 race3
+1) "budhi"
+2) "oct"
+3) "malik"
+4) "adam"
+5) "husei"
+localhost:6379>
+
+
