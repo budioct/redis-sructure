@@ -92,7 +92,7 @@ localhost:6379> smembers race
 (empty array)
 localhost:6379>
 
-# Syntax
+# Syntax (unutk membadingkan data pada SETS)
 # SDIFF digunakan untuk melihat perbedaan (different) dari Sets pertama dengan Sets lainnya
 # SINTER digunakan untuk melihat kesamaan (intersect) dari beberapa Sets
 # SUNION digunakan untuk melihat gabungan unik (union) dari beberapa Sets
@@ -131,6 +131,7 @@ localhost:6379>
 # Hashes adalah struktur data berbentuk pair (key-value)
 # struktur data Hashes ini, kita bisa menentukan key untuk value yang kita ingin gunakan
 
+# membuat hash
 localhost:6379> hset "student:1" name "budhi oct" value 100 address "Tangerang"
 (integer) 3
 localhost:6379> hset "student:2" name "ibnu abas" value 90 address "Depok"
@@ -153,6 +154,7 @@ localhost:6379>
 # Increment & Decrement
 # perintah HINCRBY bisa digunakan untuk melakukan increment dan decrement pada value yang terdapat pada Hashes
 
+# increment & decrement
 localhost:6379> hincrby "student:1" value -10
 (integer) 90
 localhost:6379> hincrby "student:2" value -5
@@ -166,4 +168,42 @@ localhost:6379> hgetall "student:1"
 4) "90"
 5) "address"
 6) "Tangerang"
+localhost:6379>
+
+
+
+# Sorted Sets
+# Sorted Sets adalah struktur data mirip Sets, namun datanya diurutkan sesuai nilai score yang kita tentukan
+# Jika terdapat score dengan nilai yang sama, secara otomatis akan diurutkan secara lexicographically
+# Dalam Sorted Sets, data dikatakan unik jika Value dan Score nya sama, artinya kita masih bisa menambahkan Value sama, jika Score nya berbeda
+# Score bernilai number, dan diurutkan secara ascending (dari terkecil ke terbesar)
+
+# menambah datta ke sorted set
+localhost:6379> zadd ranking 100 "budhi"
+(integer) 1
+localhost:6379> zadd ranking 90 "oct"
+(integer) 1
+localhost:6379> zadd ranking 95 "malik"
+(integer) 1
+localhost:6379> zcard ranking
+(integer) 3
+localhost:6379> zrange ranking 0 3
+1) "oct"
+2) "malik"
+3) "budhi"
+localhost:6379> zrange ranking 95 100 byscore
+1) "malik"
+2) "budhi"
+localhost:6379>
+
+# mengambild data dari sorted set
+localhost:6379> zrem ranking "budhi"
+(integer) 1
+localhost:6379> zremrangebyscore rankig 0 75
+(integer) 0
+localhost:6379> zrange ranking 0 -1 withscores
+1) "oct"
+2) "90"
+3) "malik"
+4) "95"
 localhost:6379>
