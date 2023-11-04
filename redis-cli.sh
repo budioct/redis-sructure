@@ -207,3 +207,116 @@ localhost:6379> zrange ranking 0 -1 withscores
 3) "malik"
 4) "95"
 localhost:6379>
+
+
+
+# Streams
+# Streams adalah struktur data seperti log, dimana data akan bertambah terus di belakang (append-only)
+# Streams cocok untuk menyimpan data kejadian yang biasanya berurut
+# Setiap data yang kita masukkan ke dalam Streams, Redis akan membuatkan id unik jika tidak kita tentukan id nya
+# Data yang kita masukkan ke dalam Streams adalah data berupa key-value, seperti Hash
+
+# menambah data dari Streams
+localhost:6379> xadd application.log * level "info" message "contoh info message"
+"1699106093940-0"
+localhost:6379> xadd application.log * level "error" message "contoh error message"
+"1699106141706-0"
+localhost:6379> xadd application.log * level "warning" message "contoh warning message"
+"1699106178649-0"
+localhost:6379> xread streams application.log 0
+1) 1) "application.log"
+   2) 1) 1) "1699106093940-0"
+         2) 1) "level"
+            2) "info"
+            3) "message"
+            4) "contoh info message"
+      2) 1) "1699106141706-0"
+         2) 1) "level"
+            2) "error"
+            3) "message"
+            4) "contoh error message"
+      3) 1) "1699106178649-0"
+         2) 1) "level"
+            2) "warning"
+            3) "message"
+            4) "contoh warning message"
+localhost:6379>
+
+# Masalah dengan Stream
+# Saat kita membuat aplikasi, biasanya kita akan menjalankan di beberapa server, untuk menjaga high availability
+# Apa yang terjadi jika misal kita membaca data dari Redis Stream ketika aplikasi kita berjalan di beberapa Server?
+# Yang terjadi adalah, data yang sama akan dibaca oleh aplikasi di tiap Server, artinya bisa terjadi duplikasi ketika kita membaca Stream di aplikasi yang berjalan di beberapa Server
+
+# masalah dengan mltiple application.. data bisa di baca lebih dari satu kali (jika tidak menggunakan consumer)
+localhost:6379> xadd problem * just test
+"1699106354566-0"
+localhost:6379>
+
+# baca 1
+localhost:6379> xread block 0 streams problem 0
+1) 1) "problem"
+   2) 1) 1) "1699106354566-0"
+         2) 1) "just"
+            2) "test"
+localhost:6379>
+
+# baca 2
+localhost:6379> xread block 0 streams problem 0
+1) 1) "problem"
+   2) 1) 1) "1699106354566-0"
+         2) 1) "just"
+            2) "test"
+localhost:6379>
+
+# Consumer Group
+# Dalam Stream, yang membaca data kita sebut Consumer, artinya jika terdapat beberapa aplikasi membaca data ke Stream, artinya adalah Multiple Consumer
+# Pada masalah Multiple Consumer ini, kita bisa tangani dengan fitur bernama Consumer Group
+# Consumer Group akan memastikan bahwa dalam satu Group, data hanya akan dikirim ke salah satu Consumer saja, sehingga tidak terjadi data di baca lebih dari satu kali oleh Consumer yang berbeda
+
+# Menggunakan Consumer Group
+# Untuk menggunakan fitur Consumer Group, kita harus membuat Group terlebih dahulu menggunakan perintah XGROUP CREATE
+# Selanjutnya artinya saat kita ingin membaca data dari Stream, kita harus menyebutkan Group dan juga nama consumer nya, dengan perintah XREADGROUP
+
+# membuat consumer group
+localhost:6379> xgroup create registration member $ mkstream
+OK
+localhost:6379> xgroup createconsumer registration member member-consumer-1
+(integer) 1
+localhost:6379> xgroup createconsumer registration member member-consumer-2
+(integer) 1
+localhost:6379> xadd registration * userId 1
+"1699106795009-0"
+localhost:6379> xadd registration * userId 2
+"1699106804234-0"
+localhost:6379> xadd registration * userId 3
+"1699106807228-0"
+localhost:6379> xadd registration * userId 4
+"1699106809967-0"
+localhost:6379>
+
+# menggunakan consumer group
+# consumer-1
+localhost:6379> xreadgroup group member member-consumer-1 count 1 block 0 streams registration >
+1) 1) "registration"
+   2) 1) 1) "1699106795009-0"
+         2) 1) "userId"
+            2) "1"
+localhost:6379> xreadgroup group member member-consumer-1 count 1 block 0 streams registration >
+1) 1) "registration"
+   2) 1) 1) "1699106804234-0"
+         2) 1) "userId"
+            2) "2"
+localhost:6379>
+
+# consumer-2
+localhost:6379> xreadgroup group member member-consumer-2 count 1 block 0 streams registration >
+1) 1) "registration"
+   2) 1) 1) "1699106807228-0"
+         2) 1) "userId"
+            2) "3"
+localhost:6379> xreadgroup group member member-consumer-2 count 1 block 0 streams registration >
+1) 1) "registration"
+   2) 1) 1) "1699106809967-0"
+         2) 1) "userId"
+            2) "4"
+localhost:6379>
