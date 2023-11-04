@@ -126,3 +126,44 @@ localhost:6379> sunion race2 race3
 localhost:6379>
 
 
+
+# Hashes
+# Hashes adalah struktur data berbentuk pair (key-value)
+# struktur data Hashes ini, kita bisa menentukan key untuk value yang kita ingin gunakan
+
+localhost:6379> hset "student:1" name "budhi oct" value 100 address "Tangerang"
+(integer) 3
+localhost:6379> hset "student:2" name "ibnu abas" value 90 address "Depok"
+(integer) 3
+localhost:6379> hset "student:3" name "jaka sembung" value 80 address "Bekasi"
+(integer) 3
+localhost:6379> hget "student:1" name
+"budhi oct"
+localhost:6379> hget "student:2" name
+"ibnu abas"
+localhost:6379> hgetall "student:3"
+1) "name"
+2) "jaka sembung"
+3) "value"
+4) "80"
+5) "address"
+6) "Bekasi"
+localhost:6379>
+
+# Increment & Decrement
+# perintah HINCRBY bisa digunakan untuk melakukan increment dan decrement pada value yang terdapat pada Hashes
+
+localhost:6379> hincrby "student:1" value -10
+(integer) 90
+localhost:6379> hincrby "student:2" value -5
+(integer) 85
+localhost:6379> hincrby "student:3" value 5
+(integer) 85
+localhost:6379> hgetall "student:1"
+1) "name"
+2) "budhi oct"
+3) "value"
+4) "90"
+5) "address"
+6) "Tangerang"
+localhost:6379>
