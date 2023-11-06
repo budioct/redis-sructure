@@ -349,3 +349,22 @@ localhost:6379> geosearch seller.location fromlonlat 107.160707 -6.804819 BYRADI
 1) "seller2"
 2) "seller1"
 localhost:6379>
+
+
+
+# HyperLogLog
+# HyperLogLog adalah struktur data probabilistik untuk melakukan estimasi kardinalitas (jumlah data unik) dari Set
+# Struktur data probabilistik biasanya digunakan untuk membuat memory penyimpanan lebih efisien
+# Untuk menghitung jumlah data unik menggunakan Set, biasanya kita akan menggunakan struktur data Set, namun semakin banyak datanya, semakin besar ukuran Set nya
+# Dengan menggunakan HyperLogLog, kita bisa mengestimasi jumlah data unik Set, hanya dengan menggunakan maksimal 12KB memory, dan standar error 0,81%
+
+# pfadd key ...value
+localhost:6379> pfadd visitor budhi oct malik husei
+(integer) 1
+localhost:6379> pfadd visitor budhi santi sinta oct
+(integer) 1
+localhost:6379> pfcount visitor
+(integer) 6
+localhost:6379> del visitor
+(integer) 1
+localhost:6379>
